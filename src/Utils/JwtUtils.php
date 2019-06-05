@@ -13,6 +13,7 @@ class JwtUtils
         $data = array(
             "user_id" => $user->getId(),
             "username" => $user->getUsername(),
+            "time" => (new \DateTime())->format('Y-m-d H:i:s'),
         );
         return JWT::encode($data, $_ENV['JWTKEY']);
     }
