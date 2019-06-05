@@ -30,7 +30,6 @@ class UserRepository extends ServiceEntityRepository
         $email =                   $request->request->get('email');
 
         $encodedPassword = $this->encoder->encodePassword($user, $password);
-        // TODO add password check
         $user->setUsername($username);
         $user->setEmail($email);
         $user->setPassword($encodedPassword);
