@@ -67,13 +67,13 @@ class AuthController extends AbstractController
     public function login(Request $request, UserUtils $userUtils, JwtUtils $jwt) : Response
     {
         // Get User
-        $user = $this->userRepository->findOneBy(['username' => $request->headers->get('username')]);
+        $user = $this->userRepository->findOneBy(['username' => $request->request->get('username')]);
         if(!$user){
             return $this->json(['error' => "Could not find your account"], 400);
         }
 
         // Check password
-        if($userUtils->checkPassword($user, $request->headers->get('password')) == false){
+        if($userUtils->checkPassword($user, $request->request->get('password')) == false){
             return $this->json(['error' => "Your password is incorrect"], 400);
         }
 
