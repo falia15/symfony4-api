@@ -29,9 +29,21 @@ class UserRepository extends ServiceEntityRepository
         $password =                $request->request->get("password");
         $email =                   $request->request->get('email');
 
-        $encodedPassword = $this->encoder->encodePassword($user, $password);
         $user->setUsername($username);
         $user->setEmail($email);
+        $user->setPassword($password);
+
+        return $user;
+    }
+
+    public function updateUserpassword(User $user, string $password = null) : User
+    {
+        // if password is not given, means it's use to hash the current password of user entity
+        if($password == null){
+            $password = $user->getPassword();
+        }
+
+        $encodedPassword = $this->encoder->encodePassword($user, $password);
         $user->setPassword($encodedPassword);
 
         return $user;

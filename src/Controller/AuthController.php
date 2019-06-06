@@ -48,6 +48,8 @@ class AuthController extends AbstractController
         // Create User and test entity validation
         $user = $this->userRepository->createUser($request);
         $errors = $this->validator->validate($user);
+        // update hashpassword to the user
+        $user = $this->userRepository->updateUserpassword($user);
         
         // return error if find any
         if(count($errors) > 0){
@@ -80,5 +82,47 @@ class AuthController extends AbstractController
         $token = $jwt->genereToken($user);
 
         return $this->json(['token' => $token], 200);
+    }
+
+    /**
+     * @Route("/password", name="password.edit", methods={"POST"})
+     */
+    public function editPassword(Request $request, UserUtils $userUtils, JwtUtils $jwt) : Response
+    {
+        // Decode token
+        $token = $jwt->decodeToken($request->headers->get('authorization'));
+        if(isset($token['error'])){
+            return $this->json(['error' => $token['error']], 400);
+        }
+
+        // get current user
+        $user = $this->userRepository->find($token['user_id']);
+        
+        // Verif current password
+        if($userUtils->checkPassword($user, $request->request->get('password')) == false){
+            return $this->json(['error' => "Your former password is incorrect"], 400);
+        }
+
+        // Verif new password confirm
+        if($request->request->get('new_password') != $request->request->get('new_password_confirm')){
+            return $this->json(['error' => "Password and confirm password does not match"], 400);
+        }
+
+        // Update password, first update the password without hash so the string length is checked with validator
+        $user->setPassword($request->request->get('new_password'));
+        $errors = $this->validator->validate($user);
+
+        if(count($errors) > 0){
+            return $this->jsonHandler->responseJson($errors, 400);
+        }
+
+        // Update password with hasing
+        $updatedUser = $this->userRepository->updateUserpassword($user, $request->request->get('new_password'));
+        
+        // save new user to database
+        $this->entityManager->persist($updatedUser);
+        $this->entityManager->flush();
+
+        return $this->json(['message' => "Password updated"], 200);
     }
 }
