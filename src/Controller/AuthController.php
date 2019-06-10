@@ -40,13 +40,15 @@ class AuthController extends AbstractController
      */
     public function register(Request $request) : Response
     {
+        $body = json_decode($request->getContent());
+
         // Checking confirm password
-        if($request->request->get("password") != $request->request->get("password_confirmation")){
+        if($body->password != $body->password_confirmation){
             return $this->json(['error' => "Password and confirm password does not match"], 400);
         }
 
         // Create User and test entity validation
-        $user = $this->userRepository->createUser($request);
+        $user = $this->userRepository->createUser($body);
         $errors = $this->validator->validate($user);
         // update hashpassword to the user
         $user = $this->userRepository->updateUserpassword($user);
@@ -68,14 +70,16 @@ class AuthController extends AbstractController
      */
     public function login(Request $request, UserUtils $userUtils, JwtUtils $jwt) : Response
     {
+        $body = json_decode($request->getContent());
+
         // Get User
-        $user = $this->userRepository->findOneBy(['username' => $request->request->get('username')]);
+        $user = $this->userRepository->findOneBy(['username' => $body->username]);
         if(!$user){
             return $this->json(['error' => "Could not find your account"], 400);
         }
 
         // Check password
-        if($userUtils->checkPassword($user, $request->request->get('password')) == false){
+        if($userUtils->checkPassword($user, $body->password) == false){
             return $this->json(['error' => "Your password is incorrect"], 400);
         }
 
@@ -89,6 +93,8 @@ class AuthController extends AbstractController
      */
     public function editPassword(Request $request, UserUtils $userUtils, JwtUtils $jwt) : Response
     {
+        $body = json_decode($request->getContent());
+        
         // Decode token
         $token = $jwt->decodeToken($request->headers->get('authorization'));
         if(isset($token['error'])){
@@ -99,17 +105,17 @@ class AuthController extends AbstractController
         $user = $this->userRepository->find($token['user_id']);
         
         // Verif current password
-        if($userUtils->checkPassword($user, $request->request->get('password')) == false){
+        if($userUtils->checkPassword($user, $body->password) == false){
             return $this->json(['error' => "Your former password is incorrect"], 400);
         }
 
         // Verif new password confirm
-        if($request->request->get('new_password') != $request->request->get('new_password_confirm')){
+        if($body->new_password != $body->new_password_confirm){
             return $this->json(['error' => "Password and confirm password does not match"], 400);
         }
 
         // Update password, first update the password without hash so the string length is checked with validator
-        $user->setPassword($request->request->get('new_password'));
+        $user->setPassword($body->new_password);
         $errors = $this->validator->validate($user);
 
         if(count($errors) > 0){
@@ -117,7 +123,7 @@ class AuthController extends AbstractController
         }
 
         // Update password with hasing
-        $updatedUser = $this->userRepository->updateUserpassword($user, $request->request->get('new_password'));
+        $updatedUser = $this->userRepository->updateUserpassword($user, $body->new_password);
         
         // save new user to database
         $this->entityManager->persist($updatedUser);

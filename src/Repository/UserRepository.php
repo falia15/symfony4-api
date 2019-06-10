@@ -22,12 +22,12 @@ class UserRepository extends ServiceEntityRepository
         $this->encoder = $encoder;
     }
 
-    public function createUser(Request $request) : User
+    public function createUser(\stdClass $body) : User
     {
         $user = new User();
-        $username =                $request->request->get("username");
-        $password =                $request->request->get("password");
-        $email =                   $request->request->get('email');
+        $username =                $body->username;
+        $password =                $body->password;
+        $email =                   $body->email;
 
         $user->setUsername($username);
         $user->setEmail($email);
