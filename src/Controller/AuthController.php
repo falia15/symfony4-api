@@ -44,7 +44,7 @@ class AuthController extends AbstractController
 
         // Checking confirm password
         if($body->password != $body->password_confirmation){
-            return $this->json(['error' => "Password and confirm password does not match"], 400);
+            return $this->json(['error' => "Password and confirmation password does not match"], 400);
         }
 
         // Create User and test entity validation
