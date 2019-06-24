@@ -1,0 +1,24 @@
+## Starting the project
+
+This is a Syfony 4 REST API, for now it provides authentication methods. Its make to be consume by [this project](https://github.com/falia15/react-redux-app).
+
+## Initialiase project
+
+``git clone https://github.com/falia15/symfony4-api.git``
+
+`` cd symfony-4-api``
+
+Create the .env file from the .env.exemple file, set DATABASE_URL and JWTKEY constance to your own setting.
+
+Install dependencies
+`` composer install``
+
+Create Database
+``php bin/console doctrine:database:create``
+
+Make and execute migration
+``php bin/console make:migration``
+``php bin/console doctrine:migrations:migrate``
+
+Run server
+``php bin/console server:run``
