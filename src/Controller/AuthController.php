@@ -55,7 +55,8 @@ class AuthController extends AbstractController
         
         // return error if find any
         if(count($errors) > 0){
-            return $this->jsonHandler->responseJson($errors, 400);
+            $data = $this->jsonHandler->responseValidator($errors);
+            return $this->json($data);
         }
 
         // save user to database

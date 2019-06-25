@@ -23,5 +23,20 @@ class JsonHandler {
         return $response;
     }
 
+    /**
+     * Format as an array a validation entity error, in order for the error to be send with a "error" key 
+     */
+    public function responseValidator($data) : array
+    {
+        $jsonData = $this->serializer->serialize($data, 'json');
+        $response = new Response($jsonData);
+
+        $arraySerialize = json_decode($jsonData, true); // set it true so its an array
+        
+        if(array_key_exists('detail', $arraySerialize)){
+            return ['error' => $arraySerialize['detail']];
+        }
+        return ['error' => 'Error while performing the request'];
+    }
 
 }
