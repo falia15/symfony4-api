@@ -5,8 +5,8 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -22,12 +22,12 @@ class UserRepository extends ServiceEntityRepository
         $this->encoder = $encoder;
     }
 
-    public function createUser(\stdClass $body) : User
+    public function createUser(array $body) : User
     {
         $user = new User();
-        $username =                $body->username;
-        $password =                $body->password;
-        $email =                   $body->email;
+        $username =                $body['username'];
+        $password =                $body['password'];
+        $email =                   $body['email'];
 
         $user->setUsername($username);
         $user->setEmail($email);
