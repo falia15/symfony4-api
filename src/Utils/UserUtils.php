@@ -14,6 +14,9 @@ class UserUtils
         $this->encoder = $encoder;
     }
 
+    /**
+     * Verif if an encoded password is the same password of a non encoded password given as a parameter 
+     */
     public function checkPassword(User $user, string $password) : bool
     {
         if($this->encoder->isPasswordValid($user, $password)){
