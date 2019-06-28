@@ -24,7 +24,7 @@ class Status
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Game", mappedBy="status_id")
+     * @ORM\OneToMany(targetEntity="App\Entity\Game", mappedBy="status")
      */
     private $games;
 
@@ -62,7 +62,7 @@ class Status
     {
         if (!$this->games->contains($game)) {
             $this->games[] = $game;
-            $game->setStatusId($this);
+            $game->setStatus($this);
         }
 
         return $this;
@@ -73,8 +73,8 @@ class Status
         if ($this->games->contains($game)) {
             $this->games->removeElement($game);
             // set the owning side to null (unless already changed)
-            if ($game->getStatusId() === $this) {
-                $game->setStatusId(null);
+            if ($game->getStatus() === $this) {
+                $game->setStatus(null);
             }
         }
 
