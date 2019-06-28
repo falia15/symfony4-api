@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -45,6 +47,16 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255, unique=true)
      */
     private $email;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Game", mappedBy="user_creator_id")
+     */
+    private $games;
+
+    public function __construct()
+    {
+        $this->games = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -102,6 +114,18 @@ class User implements UserInterface
         return $this;
     }
 
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
     /**
      * @see UserInterface
      */
@@ -119,14 +143,33 @@ class User implements UserInterface
         // $this->plainPassword = null;
     }
 
-    public function getEmail(): ?string
+    /**
+     * @return Collection|Game[]
+     */
+    public function getGames(): Collection
     {
-        return $this->email;
+        return $this->games;
     }
 
-    public function setEmail(string $email): self
+    public function addGame(Game $game): self
     {
-        $this->email = $email;
+        if (!$this->games->contains($game)) {
+            $this->games[] = $game;
+            $game->setUserCreatorId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGame(Game $game): self
+    {
+        if ($this->games->contains($game)) {
+            $this->games->removeElement($game);
+            // set the owning side to null (unless already changed)
+            if ($game->getUserCreatorId() === $this) {
+                $game->setUserCreatorId(null);
+            }
+        }
 
         return $this;
     }
