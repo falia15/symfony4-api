@@ -5,6 +5,8 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\GameRepository")
@@ -25,18 +27,29 @@ class Game
     private $userCreator;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Status", inversedBy="games")
-     * @ORM\JoinColumn(nullable=false)
-     */
+     * @ORM\Column(type="integer")
+     * @Assert\Range(
+     *      min = 1,
+     *      max = 3,
+     * )
+    */
     private $status;
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\Range(
+     *      min = 1,
+     *      max = 3,
+     * )
      */
     private $level;
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\Range(
+     *      min = 4,
+     *      max = 15,
+     * )
      */
     private $answer;
 
@@ -44,6 +57,11 @@ class Game
      * @ORM\OneToMany(targetEntity="App\Entity\GameUser", mappedBy="game")
      */
     private $gameUsers;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $timestamp;
 
     public function __construct()
     {
@@ -67,12 +85,12 @@ class Game
         return $this;
     }
 
-    public function getStatus(): ?Status
+    public function getStatus(): ?int
     {
         return $this->status;
     }
 
-    public function setStatus(?Status $status): self
+    public function setStatus(?int $status): self
     {
         $this->status = $status;
 
@@ -130,6 +148,18 @@ class Game
                 $gameUsers->setGame(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTimestamp(): ?\DateTimeInterface
+    {
+        return $this->timestamp;
+    }
+
+    public function setTimestamp(\DateTimeInterface $timestamp): self
+    {
+        $this->timestamp = $timestamp;
 
         return $this;
     }
