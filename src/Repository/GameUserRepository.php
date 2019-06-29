@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\GameUser;
+use App\Entity\Game;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -19,32 +21,12 @@ class GameUserRepository extends ServiceEntityRepository
         parent::__construct($registry, GameUser::class);
     }
 
-    // /**
-    //  * @return GameUser[] Returns an array of GameUser objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function userJoinGame(User $user, Game $game) : GameUser
     {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('g.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        $gameUser = new GameUser();
+        $gameUser->setUser($user);
+        $gameUser->setGame($game);
+        $gameUser->setScore(0); // a user has 0 when it joins a game
+        return $gameUser;
     }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?GameUser
-    {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }
