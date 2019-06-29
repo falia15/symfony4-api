@@ -49,13 +49,19 @@ class User implements UserInterface
     private $email;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Game", mappedBy="user_creator_id")
+     * @ORM\OneToMany(targetEntity="App\Entity\Game", mappedBy="userCreator")
      */
     private $games;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\GameUser", mappedBy="user")
+     */
+    private $gameUsers;
 
     public function __construct()
     {
         $this->games = new ArrayCollection();
+        $this->gameUsers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -155,7 +161,7 @@ class User implements UserInterface
     {
         if (!$this->games->contains($game)) {
             $this->games[] = $game;
-            $game->setUserCreatorId($this);
+            $game->setUserCreator($this);
         }
 
         return $this;
@@ -166,8 +172,39 @@ class User implements UserInterface
         if ($this->games->contains($game)) {
             $this->games->removeElement($game);
             // set the owning side to null (unless already changed)
-            if ($game->getUserCreatorId() === $this) {
-                $game->setUserCreatorId(null);
+            if ($game->getUserCreator() === $this) {
+                $game->setUserCreator(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|GameUser[]
+     */
+    public function getGameUsers(): Collection
+    {
+        return $this->gameUsers;
+    }
+
+    public function addGameUser(GameUser $gameUser): self
+    {
+        if (!$this->gameUsers->contains($gameUser)) {
+            $this->gameUsers[] = $gameUser;
+            $gameUser->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGameUser(GameUser $gameUser): self
+    {
+        if ($this->gameUsers->contains($gameUser)) {
+            $this->gameUsers->removeElement($gameUser);
+            // set the owning side to null (unless already changed)
+            if ($gameUser->getUser() === $this) {
+                $gameUser->setUser(null);
             }
         }
 

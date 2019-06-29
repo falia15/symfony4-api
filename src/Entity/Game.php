@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -17,9 +19,16 @@ class Game
     private $id;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="games")
+     * @ORM\JoinColumn(nullable=false)
      */
-    private $timestamp;
+    private $userCreator;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Status", inversedBy="games")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $status;
 
     /**
      * @ORM\Column(type="integer")
@@ -32,30 +41,40 @@ class Game
     private $answer;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="games")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToMany(targetEntity="App\Entity\GameUser", mappedBy="game")
      */
-    private $user;
+    private $gameUsers;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Status", inversedBy="games")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $status;
+    public function __construct()
+    {
+        $this->gameUsers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getTimestamp(): ?\DateTimeInterface
+    public function getUserCreator(): ?User
     {
-        return $this->timestamp;
+        return $this->userCreator;
     }
 
-    public function setTimestamp(\DateTimeInterface $timestamp): self
+    public function setUserCreator(?User $userCreator): self
     {
-        $this->timestamp = $timestamp;
+        $this->userCreator = $userCreator;
+
+        return $this;
+    }
+
+    public function getStatus(): ?Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?Status $status): self
+    {
+        $this->status = $status;
 
         return $this;
     }
@@ -84,26 +103,33 @@ class Game
         return $this;
     }
 
-    public function getUser(): ?User
+    /**
+     * @return Collection|GameUser[]
+     */
+    public function getUser(): Collection
     {
-        return $this->user;
+        return $this->gameUsers;
     }
 
-    public function setUser(?User $user): self
+    public function addUser(GameUser $gameUsers): self
     {
-        $this->user = $user;
+        if (!$this->gameUsers->contains($gameUsers)) {
+            $this->gameUsers[] = $gameUsers;
+            $gameUsers->setGame($this);
+        }
 
         return $this;
     }
 
-    public function getStatus(): ?Status
+    public function removeUser(GameUser $gameUsers): self
     {
-        return $this->status;
-    }
-
-    public function setStatus(?Status $status): self
-    {
-        $this->status = $status;
+        if ($this->gameUsers->contains($gameUsers)) {
+            $this->gameUsers->removeElement($gameUsers);
+            // set the owning side to null (unless already changed)
+            if ($gameUsers->getGame() === $this) {
+                $gameUsers->setGame(null);
+            }
+        }
 
         return $this;
     }
