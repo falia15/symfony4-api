@@ -16,6 +16,7 @@ use App\Repository\UserRepository;
 
 use App\Utils\JsonHandler;
 use App\Utils\JwtUtils;
+use App\Utils\GameHandler;
 
 /**
 * @Route("/api")
@@ -75,7 +76,25 @@ class GameController extends AbstractController
          $this->entityManager->persist($gameUser);
          $this->entityManager->flush();
 
-        // return new game
+        // return new game id
         return $this->json(['game_id' => $game->getId()], 200);
+    }
+
+    /**
+     * Store a new game in the database
+     * @Route("/game.index", name="game.index", methods={"GET"})
+     */
+    public function getAvalaibleGame(Request $request, GameHandler $gameHandler) : Response
+    {
+        $body = json_decode($request->getContent(), true);
+        // Decode token
+        $token = $this->jwt->decodeToken($request->headers->get('authorization'));
+        if(isset($token['error'])){
+            return $this->json(['error' => $token['error']], 400);
+        }
+
+        $gameAvailable = $this->gameRepository->getAvalaibleGame();
+
+        return $gameHandler->gamesResponse($gameAvailable);
     }
 }

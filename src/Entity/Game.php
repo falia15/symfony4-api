@@ -27,6 +27,9 @@ class Game
     private $userCreator;
 
     /**
+     * 1 = Waiting for player
+     * 2 = Running
+     * 3 = Finish
      * @ORM\Column(type="integer")
      * @Assert\Range(
      *      min = 1,
