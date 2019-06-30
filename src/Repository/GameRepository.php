@@ -28,6 +28,7 @@ class GameRepository extends ServiceEntityRepository
         $game->setTimestamp(new \DateTime());
         $game->setLevel($body['level']);
         $game->setAnswer($body['answer']);
+        $game->setScoreToWin($body['score_to_win']);
 
         return $game;
     }

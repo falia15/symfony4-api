@@ -63,6 +63,11 @@ class Game
      */
     private $timestamp;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $scoreToWin;
+
     public function __construct()
     {
         $this->gameUsers = new ArrayCollection();
@@ -160,6 +165,18 @@ class Game
     public function setTimestamp(\DateTimeInterface $timestamp): self
     {
         $this->timestamp = $timestamp;
+
+        return $this;
+    }
+
+    public function getScoreToWin(): ?int
+    {
+        return $this->scoreToWin;
+    }
+
+    public function setScoreToWin(int $scoreToWin): self
+    {
+        $this->scoreToWin = $scoreToWin;
 
         return $this;
     }
