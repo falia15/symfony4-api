@@ -32,7 +32,8 @@ class GameController extends AbstractController
         GameUserRepository $gameUserRepository,
         UserRepository $userRepository,
         JwtUtils $jwt,
-        EntityManagerInterface $entityManager)
+        EntityManagerInterface $entityManager,
+        GameHandler $gameHandler)
     {
         $this->gameRepository = $gameRepository;
         $this->validator = $validator;
@@ -41,6 +42,7 @@ class GameController extends AbstractController
         $this->userRepository = $userRepository;
         $this->jwt = $jwt;
         $this->entityManager = $entityManager;
+        $this->gameHandler = $gameHandler;
     }
 
     /**
@@ -77,24 +79,24 @@ class GameController extends AbstractController
          $this->entityManager->flush();
 
         // return new game id
-        return $this->json(['game_id' => $game->getId()], 200);
+        return $this->gameHandler->gamesResponse($game);
     }
 
     /**
      * Store a new game in the database
-     * @Route("/game.index", name="game.index", methods={"GET"})
+     * @Route("/game.index", name="game.index", methods={"GET", "OPTIONS"})
      */
-    public function getAvalaibleGame(Request $request, GameHandler $gameHandler) : Response
+    public function getAvalaibleGame(Request $request) : Response
     {
         $body = json_decode($request->getContent(), true);
         // Decode token
-        $token = $this->jwt->decodeToken($request->headers->get('authorization'));
+        $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
             return $this->json(['error' => $token['error']], 400);
         }
 
         $gameAvailable = $this->gameRepository->getAvalaibleGame();
 
-        return $gameHandler->gamesResponse($gameAvailable);
+        return $this->gameHandler->gamesResponse($gameAvailable);
     }
 }

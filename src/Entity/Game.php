@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 /**
@@ -17,12 +18,14 @@ class Game
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"game_default"})
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="games")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"game_default"})
      */
     private $userCreator;
 
@@ -35,6 +38,7 @@ class Game
      *      min = 1,
      *      max = 3,
      * )
+     * @Groups({"game_default"})
     */
     private $status;
 
@@ -44,6 +48,7 @@ class Game
      *      min = 1,
      *      max = 3,
      * )
+     * @Groups({"game_default"})
      */
     private $level;
 
@@ -53,6 +58,7 @@ class Game
      *      min = 4,
      *      max = 15,
      * )
+     * @Groups({"game_default"})
      */
     private $answer;
 
@@ -68,6 +74,7 @@ class Game
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"game_default"})
      */
     private $scoreToWin;
 

@@ -5,7 +5,9 @@ namespace App\Utils;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 
-
+/**
+ * This class handler all default Json response
+ */
 class JsonHandler {
 
     public function __construct(SerializerInterface $serializer)
@@ -13,14 +15,13 @@ class JsonHandler {
         $this->serializer = $serializer;
     }
 
+    /**
+     * Default serialiser
+     */
     public function responseJson($data, int $status = 200) : Response
     {
-        $jsonData = $this->serializer->serialize($data, 'json');
-        $response = new Response($jsonData);
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setStatusCode($status);
-
-        return $response;
+        $data = $this->serializer->serialize($data, 'json');
+        return $this->headerData($data, $status);
     }
 
     /**
@@ -37,6 +38,21 @@ class JsonHandler {
             return ['error' => $arraySerialize['detail']];
         }
         return ['error' => 'Error while performing the request'];
+    }
+
+    /**
+     * header content of responses
+     */
+    protected function headerData($response, int $status)
+    {
+        $response = new Response($response);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Content-Type', 'application/json');
+        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
+        $response->headers->set('Access-Control-Allow-Headers', "content-type, access-control-allow-origin, access-control-allow-credentials, access-control-allow-headers, access-control-allow-methods, Authorization");
+        $response->setStatusCode($status);
+
+        return $response;
     }
 
 }

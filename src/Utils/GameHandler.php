@@ -7,32 +7,19 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 use App\Utils\JsonHandler;
 
+/**
+ * This class handler all json response for the Game Entity
+ */
 class GameHandler extends JsonHandler {
 
     /**
      * Format to json an array of Game entity 
+     * @param $games, array of Game or Game
      */
-    public function gamesResponse(array $games) : Response
+    public function gamesResponse($games, $status = 200) : Response
     {
-        $result = [];
-        foreach($games as $game){
-            $gameArray = [];
-            $userArray = [];
-
-            $userArray['id'] = $game->getUserCreator()->getId();
-            $userArray['name'] = $game->getUserCreator()->getUsername();
-
-            $gameArray['id'] = $game->getId();
-            $gameArray['level'] = $game->getLevel();
-            $gameArray['answer'] = $game->getAnswer();
-            $gameArray['timestamp'] = $game->getTimestamp()->format('d/m/Y H:i');
-            $gameArray['scoreToWin'] = $game->getScoreToWin();
-            $gameArray['creator'] = $userArray;
-
-            $result[] = $gameArray;
-        }
-
-        return $this->responseJson($result);
+        $jsonData = $this->serializer->serialize($games, 'json',['groups' => ['game_default']]);
+        return $this->headerData($jsonData, $status);
     }
 
 }
