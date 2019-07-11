@@ -69,6 +69,7 @@ class Game
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"game_default"})
      */
     private $timestamp;
 
