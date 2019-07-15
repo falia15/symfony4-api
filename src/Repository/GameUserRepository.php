@@ -26,7 +26,27 @@ class GameUserRepository extends ServiceEntityRepository
         $gameUser = new GameUser();
         $gameUser->setUser($user);
         $gameUser->setGame($game);
-        $gameUser->setScore(0); // a user has 0 when it joins a game
+        $gameUser->setScore(0); // a user has 0 when they join a game
         return $gameUser;
+    }
+
+    
+    public function getRunningGame(User $user) : array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $sql = "SELECT game.id, username as creator, level, answer, score_to_win, timestamp, status, count(game_user.user_id) as total_player
+        FROM game_user
+        JOIN game ON game.id = game_user.game_id
+        JOIN user ON user.id = game.user_creator_id
+        WHERE game.status != 3 AND user_id = :userId
+        GROUP BY id
+        ORDER BY game.timestamp DESC";
+
+        $statement = $connection->prepare($sql);
+        $statement->execute(['userId' => $user->getId()]);
+
+        // returns an array of arrays (i.e. a raw data set)
+        return $statement->fetch();
     }
 }

@@ -53,7 +53,7 @@ class GameController extends AbstractController
     {
         $body = json_decode($request->getContent(), true);
         // Decode token
-        $token = $this->jwt->decodeToken($request->headers->get('authorization'));
+        $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
             return $this->json(['error' => $token['error']], 400);
         }
@@ -78,25 +78,67 @@ class GameController extends AbstractController
          $this->entityManager->persist($gameUser);
          $this->entityManager->flush();
 
-        // return new game id
+        // return new game
         return $this->gameHandler->gamesResponse($game);
     }
 
     /**
-     * Store a new game in the database
-     * @Route("/game.index", name="game.index", methods={"GET", "OPTIONS"})
+     * @Route("/game.store.join", name="game.store.join", methods={"POST"})
      */
-    public function getAvalaibleGame(Request $request) : Response
+    public function storeUserGame(Request $request) : Response
     {
+        // Decode token
+        $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
+        if(isset($token['error'])){
+            return $this->json(['error' => $token['error']], 400);
+        }
+        // get auth user and game
         $body = json_decode($request->getContent(), true);
+        $user = $this->userRepository->find($token['user_id']);
+        $game = $this->gameRepository->find($body['game_id']);
+        
+        // save game to database
+        $gameUser = $this->gameUserRepository->userJoinGame($user, $game);
+        $this->entityManager->persist($gameUser);
+        $this->entityManager->flush();
+
+        return $this->jsonHandler->responseJson(['gameId' => $body['game_id']]);
+
+    }
+
+    /**
+     * @Route("/game.index.status", name="game.index.status", methods={"GET", "OPTIONS"})
+     */
+    public function indexGameStatus(Request $request) : Response
+    {
         // Decode token
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
             return $this->json(['error' => $token['error']], 400);
         }
 
-        $gameAvailable = $this->gameRepository->getAvalaibleGame();
-
+        $status = $request->query->get('id');
+        $gameAvailable = $this->gameRepository->getGameByStatus($status);
+        
         return $this->gameHandler->gamesResponse($gameAvailable);
     }
+
+    /**
+     * @Route("/game.index.running", name="game.index.running", methods={"GET", "OPTIONS"})
+     */
+    public function indexGameRunning(Request $request) : Response
+    {
+        // Decode token
+        $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
+        if(isset($token['error'])){
+            return $this->json(['error' => $token['error']], 400);
+        }
+
+        $user = $this->userRepository->find($token['user_id']);
+        $game = $this->gameUserRepository->getRunningGame($user);
+
+        return $this->jsonHandler->responseJson($game);
+    }   
+
+
 }

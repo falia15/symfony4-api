@@ -30,14 +30,24 @@ class GameRepository extends ServiceEntityRepository
         return $game;
     }
 
-    public function getAvalaibleGame() : array
+    public function getGameByStatus(int $status) : array
     {
-        $games = $this->findBy(
-            ['status' => 1],
-            ['timestamp' => 'DESC']
-        );
-
-        return $games;
+        $connection = $this->getEntityManager()->getConnection();
+        
+        $sql = "SELECT 
+        game.id, user_creator_id, username as creator, status, level, answer, timestamp, score_to_win, count(game_user.user_id) as total_player
+        FROM game
+        JOIN game_user ON game_user.game_id = game.id
+        JOIN user ON user.id = game.user_creator_id
+        WHERE game.status = :status
+        group by game.id
+        ORDER BY timestamp DESC";
+        
+        $statement = $connection->prepare($sql);
+        $statement->execute(['status' => $status]);
+       
+        // returns an array of arrays (i.e. a raw data set)
+        return $statement->fetchAll();
     }
 
 
