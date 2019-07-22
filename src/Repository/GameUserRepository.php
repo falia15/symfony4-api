@@ -39,7 +39,11 @@ class GameUserRepository extends ServiceEntityRepository
         FROM game_user
         JOIN game ON game.id = game_user.game_id
         JOIN user ON user.id = game.user_creator_id
-        WHERE game.status != 3 AND user_id = :userId
+        WHERE game.status != 3 AND game.id IN (
+            SELECT game_id 
+            FROM game_user
+            WHERE user_id = :userId
+        )
         GROUP BY id
         ORDER BY game.timestamp DESC";
 

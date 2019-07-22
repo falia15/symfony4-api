@@ -55,10 +55,16 @@ class GameController extends AbstractController
         // Decode token
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
-            return $this->json(['error' => $token['error']], 400);
+            return $this->jsonHandler->responseJson(['error' => $token['error']], 400);
         }
         // get auth user
         $user = $this->userRepository->find($token['user_id']);
+
+        // check if user is not already in a game
+        $isUserInGame = $this->gameRepository->isUserInGame($user);
+        if($isUserInGame === true){
+            return $this->jsonHandler->responseJson(['error' => 'You are already in a game']);
+        }
 
         // create game and test entity validation
         $game = $this->gameRepository->createGame($body, $user);
@@ -67,16 +73,16 @@ class GameController extends AbstractController
          // return error if find any
         if(count($errors) > 0){
              $data = $this->jsonHandler->responseValidator($errors);
-             return $this->json($data, 400);
+             return $this->jsonHandler->responseJson($data, 400);
         }
-
-         // add user creator to the game
-         $gameUser = $this->gameUserRepository->userJoinGame($user, $game);
+        
+        // add user creator to the game
+        $gameUser = $this->gameUserRepository->userJoinGame($user, $game);
  
-         // save game to database
-         $this->entityManager->persist($game);
-         $this->entityManager->persist($gameUser);
-         $this->entityManager->flush();
+        // save game to database
+        $this->entityManager->persist($game);
+        $this->entityManager->persist($gameUser);
+        $this->entityManager->flush();
 
         // return new game
         return $this->gameHandler->gamesResponse($game);

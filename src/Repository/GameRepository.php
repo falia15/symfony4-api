@@ -50,5 +50,25 @@ class GameRepository extends ServiceEntityRepository
         return $statement->fetchAll();
     }
 
+    public function isUserInGame(User $user) : bool
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        
+        $sql = "SELECT game.id
+        FROM game
+        JOIN game_user ON game_user.game_id = game.id
+        WHERE game_user.user_id = :userId
+        AND game.status != 3";
+        
+        $statement = $connection->prepare($sql);
+        $statement->execute(['userId' => $user->getId()]);
+       
+        $result = $statement->fetchAll();
+        if(count($result) === 0){
+            return false;
+        }
+        return true;
+    }
+
 
 }
