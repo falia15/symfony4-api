@@ -11,7 +11,7 @@ class JwtUtils
     public function genereToken(User $user) : string
     {
         $data = array(
-            "user_id" => $user->getId(),
+            "id" => $user->getId(),
             "username" => $user->getUsername(),
             "time" => (new \DateTime())->format('Y-m-d H:i:s'),
         );

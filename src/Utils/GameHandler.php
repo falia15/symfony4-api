@@ -22,4 +22,10 @@ class GameHandler extends JsonHandler {
         return $this->headerData($jsonData, $status);
     }
 
+    public function gameWithPlayer($game, $status = 200) : Response
+    {
+        $jsonData = $this->serializer->serialize($game, 'json',['groups' => ['game_with_user']]);
+        return $this->headerData($jsonData, $status);
+    }
+
 }

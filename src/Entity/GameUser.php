@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Symfony\Component\Serializer\Annotation\Groups;
+
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -26,11 +28,13 @@ class GameUser
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="gameUser")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"game_with_user"})
      */
     private $user;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"game_with_user"})
      */
     private $score;
 

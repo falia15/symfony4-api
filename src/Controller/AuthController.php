@@ -36,7 +36,7 @@ class AuthController extends AbstractController
     }
 
     /**
-     * @Route("/register", name="register", methods={"POST"})
+     * @Route("/register", name="register", methods={"POST", "OPTIONS"})
      */
     public function register(Request $request) : Response
     {
@@ -67,7 +67,7 @@ class AuthController extends AbstractController
     }
 
     /**
-     * @Route("/login", name="login", methods={"POST"})
+     * @Route("/login", name="login", methods={"POST", "OPTIONS"})
      */
     public function login(Request $request, UserUtils $userUtils, JwtUtils $jwt) : Response
     {
@@ -76,21 +76,21 @@ class AuthController extends AbstractController
         // Get User
         $user = $this->userRepository->findOneBy(['username' => $body['username'] ]);
         if(!$user){
-            return $this->json(['error' => "Could not find your account"], 400);
+            return $this->jsonHandler->responseJson(['error' => "Could not find your account"], 400);
         }
 
         // Check password
         if($userUtils->checkPassword($user, $body['password']) == false){
-            return $this->json(['error' => "Your password is incorrect"], 400);
+            return $this->jsonHandler->responseJson(['error' => "Your password is incorrect"], 400);
         }
 
         $token = $jwt->genereToken($user);
 
-        return $this->json(['token' => $token], 200);
+        return $this->jsonHandler->responseJson(['token' => $token]);
     }
 
     /**
-     * @Route("/password", name="password.edit", methods={"POST"})
+     * @Route("/password", name="password.edit", methods={"POST", "OPTIONS"})
      */
     public function editPassword(Request $request, UserUtils $userUtils, JwtUtils $jwt) : Response
     {
@@ -103,7 +103,7 @@ class AuthController extends AbstractController
         }
 
         // get current user
-        $user = $this->userRepository->find($token['user_id']);
+        $user = $this->userRepository->find($token['id']);
         
         // Verif current password
         if($userUtils->checkPassword($user, $body['password']) == false){

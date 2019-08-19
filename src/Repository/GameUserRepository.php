@@ -53,4 +53,20 @@ class GameUserRepository extends ServiceEntityRepository
         // returns an array of arrays (i.e. a raw data set)
         return $statement->fetch();
     }
+
+    public function getUserInGame(int $gameId) : array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $sql = "SELECT user.id, username 
+        FROM game_user
+        JOIN user ON user.id = game_user.user_id
+        WHERE game_id = :gameId";
+
+        $statement = $connection->prepare($sql);
+        $statement->execute(['gameId' => $gameId]);
+
+        // returns an array of arrays (i.e. a raw data set)
+        return $statement->fetchAll();
+    }
 }

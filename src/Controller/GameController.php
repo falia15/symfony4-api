@@ -21,7 +21,6 @@ use App\Utils\GameHandler;
 /**
 * @Route("/api")
 */
-
 class GameController extends AbstractController
 {
 
@@ -58,7 +57,7 @@ class GameController extends AbstractController
             return $this->jsonHandler->responseJson(['error' => $token['error']], 400);
         }
         // get auth user
-        $user = $this->userRepository->find($token['user_id']);
+        $user = $this->userRepository->find($token['id']);
 
         // check if user is not already in a game
         $isUserInGame = $this->gameRepository->isUserInGame($user);
@@ -100,7 +99,7 @@ class GameController extends AbstractController
         }
         // get auth user and game
         $body = json_decode($request->getContent(), true);
-        $user = $this->userRepository->find($token['user_id']);
+        $user = $this->userRepository->find($token['id']);
         $game = $this->gameRepository->find($body['game_id']);
         
         // save game to database
@@ -140,11 +139,64 @@ class GameController extends AbstractController
             return $this->json(['error' => $token['error']], 400);
         }
 
-        $user = $this->userRepository->find($token['user_id']);
+        $user = $this->userRepository->find($token['id']);
         $game = $this->gameUserRepository->getRunningGame($user);
 
-        return $this->jsonHandler->responseJson($game);
+        return $this->gameHandler->gamesResponse($game);
     }   
 
+    /**
+     * @Route("/game.show", name="game.show", methods={"GET", "OPTIONS"})
+     */
+    public function getGame(Request $request) : Response
+    {
+        // Decode token
+        $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
+        if(isset($token['error'])){
+            return $this->json(['error' => $token['error']], 400);
+        }
+
+        $gameId = $request->query->get('id');
+        $game = $this->gameRepository->find($gameId);
+
+        return $this->gameHandler->gamesResponse($game);
+    }
+
+    /**
+     * @Route("/game.user.show", name="game.user.show", methods={"GET", "OPTIONS"})
+     */
+    public function getUserByGame(Request $request) : Response
+    {
+        // Decode token
+        $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
+        if(isset($token['error'])){
+            return $this->json(['error' => $token['error']], 400);
+        }
+
+        $gameId = $request->query->get('id');
+        $users = $this->gameUserRepository->getUserInGame($gameId);
+
+        return $this->jsonHandler->responseJson($users);
+    }
+
+    /**
+     * @Route("/game.status", name="game.status", methods={"POST"})
+     */
+    public function changeGameStatus(Request $request) : Response
+    {
+       // Decode token
+       $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
+       if(isset($token['error'])){
+           return $this->json(['error' => $token['error']], 400);
+       }
+
+       $body = json_decode($request->getContent(), true);
+
+       $game = $this->gameRepository->find($body["id"]);
+       $game->setStatus($body['status']);
+       $this->entityManager->flush();
+
+       return $this->gameHandler->gamesResponse($game);
+    }
 
 }

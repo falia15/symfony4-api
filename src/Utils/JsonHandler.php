@@ -46,8 +46,9 @@ class JsonHandler {
     protected function headerData($response, int $status)
     {
         $response = new Response($response);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
         $response->headers->set('Content-Type', 'application/json');
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
         $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
         $response->headers->set('Access-Control-Allow-Headers', "content-type, access-control-allow-origin, access-control-allow-credentials, access-control-allow-headers, access-control-allow-methods, Authorization");
         $response->setStatusCode($status);
