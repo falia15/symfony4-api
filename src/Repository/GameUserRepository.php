@@ -50,8 +50,13 @@ class GameUserRepository extends ServiceEntityRepository
         $statement = $connection->prepare($sql);
         $statement->execute(['userId' => $user->getId()]);
 
-        // returns an array of arrays (i.e. a raw data set)
-        return $statement->fetch();
+        $result = $statement->fetch();
+
+        // prevent from sending a boolean if they aren't any result, send an empty array
+        if($result === false){
+            return [];
+        }
+        return $result;
     }
 
     public function getUserInGame(int $gameId) : array
