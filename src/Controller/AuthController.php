@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Controller\BasicController;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -41,10 +42,11 @@ class AuthController extends AbstractController
     public function register(Request $request) : Response
     {
         $body = json_decode($request->getContent(), true);
-
+        
         // Checking confirm password
         if($body['password'] != $body['password_confirmation']){
-            return $this->json(['error' => "Password and confirmation password does not match"], 400);
+            $data = json_encode(['error' => "Password and confirmation password does not match"]);
+            return  $this->jsonHandler->responseJson($data, $request, 400);
         }
 
         // Create User and test entity validation
@@ -55,15 +57,15 @@ class AuthController extends AbstractController
         
         // return error if find any
         if(count($errors) > 0){
-            $data = $this->jsonHandler->responseValidator($errors);
-            return $this->json($data);
+            $data = $this->jsonHandler->validatorSerialize($errors);
+            return $this->jsonHandler->responseJson($data, $request, 400);
         }
-
         // save user to database
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-        
-        return $this->jsonHandler->responseJson($user);
+
+        $userJson = $this->jsonHandler->defaultSerialize($user);
+        return $this->jsonHandler->responseJson($userJson);
     }
 
     /**
@@ -75,18 +77,21 @@ class AuthController extends AbstractController
 
         // Get User
         $user = $this->userRepository->findOneBy(['username' => $body['username'] ]);
+
         if(!$user){
-            return $this->jsonHandler->responseJson(['error' => "Could not find your account"], 400);
+            $data = $this->jsonHandler->defaultSerialize(['error' => "Could not find your account"]);
+            return $this->jsonHandler->responseJson($data, $request, 400);
         }
 
         // Check password
         if($userUtils->checkPassword($user, $body['password']) == false){
-            return $this->jsonHandler->responseJson(['error' => "Your password is incorrect"], 400);
+            $data = $this->jsonHandler->defaultSerialize(['error' => "Your password is incorrect"]);
+            return $this->jsonHandler->responseJson($data, $request, 400);
         }
-
+        
         $token = $jwt->genereToken($user);
-
-        return $this->jsonHandler->responseJson(['token' => $token]);
+        $tokenJson = json_encode(['token' => $token]);
+        return $this->jsonHandler->responseJson($tokenJson);
     }
 
     /**

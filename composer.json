@@ -6,6 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "firebase/php-jwt": "^5.0",
+        "nelmio/cors-bundle": "^1.5",
         "symfony/console": "4.2.*",
         "symfony/dotenv": "4.2.*",
         "symfony/flex": "^1.1",
@@ -65,6 +66,7 @@
     "require-dev": {
         "symfony/maker-bundle": "^1.11",
         "symfony/phpunit-bridge": "^4.3",
+        "symfony/var-dumper": "4.2.*",
         "symfony/web-server-bundle": "4.2.*"
     }
 }

@@ -16,16 +16,14 @@ class GameHandler extends JsonHandler {
      * Format to json an array of Game entity 
      * @param $games, array of Game or Game
      */
-    public function gamesResponse($games, $status = 200) : Response
+    public function gamesResponse($games, $status = 200) 
     {
-        $jsonData = $this->serializer->serialize($games, 'json',['groups' => ['game_default']]);
-        return $this->headerData($jsonData, $status);
+        return $this->serializer->serialize($games, 'json',['groups' => ['game_default']]);
     }
 
-    public function gameWithPlayer($game, $status = 200) : Response
+    public function gameWithPlayer($game, $status = 200)
     {
-        $jsonData = $this->serializer->serialize($game, 'json',['groups' => ['game_with_user']]);
-        return $this->headerData($jsonData, $status);
+        return $this->serializer->serialize($game, 'json',['groups' => ['game_with_user']]);
     }
 
 }

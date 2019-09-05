@@ -4,6 +4,8 @@ namespace App\Utils;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpFoundation\Request;
+
 
 /**
  * This class handler all default Json response
@@ -18,16 +20,15 @@ class JsonHandler {
     /**
      * Default serialiser
      */
-    public function responseJson($data, int $status = 200) : Response
+    public function defaultSerialize($data) : string
     {
-        $data = $this->serializer->serialize($data, 'json');
-        return $this->headerData($data, $status);
+        return $this->serializer->serialize($data, 'json');
     }
 
     /**
      * Format as an array a validation entity error, in order for the error to be send with a "error" key 
      */
-    public function responseValidator($data) : array
+    public function validatorSerialize($data) : string
     {
         $jsonData = $this->serializer->serialize($data, 'json');
         $response = new Response($jsonData);
@@ -35,22 +36,20 @@ class JsonHandler {
         $arraySerialize = json_decode($jsonData, true); // set it true so its an array
         
         if(array_key_exists('detail', $arraySerialize)){
-            return ['error' => $arraySerialize['detail']];
+            return $this->defaultSerialize(['error' => $arraySerialize['detail']]);
         }
-        return ['error' => 'Error while performing the request'];
+        return $this->defaultSerialize(['error' => 'Error while performing the request']);
     }
 
     /**
      * header content of responses
      */
-    protected function headerData($response, int $status)
+    public function responseJson($response, int $status = 200) : Response
     {
         $response = new Response($response);
-        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
+        $response->headers->set('Accept', 'application/json');
         $response->headers->set('Content-Type', 'application/json');
-        $response->headers->set('Access-Control-Allow-Credentials', 'true');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
-        $response->headers->set('Access-Control-Allow-Headers', "content-type, access-control-allow-origin, access-control-allow-credentials, access-control-allow-headers, access-control-allow-methods, Authorization");
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
         $response->setStatusCode($status);
 
         return $response;

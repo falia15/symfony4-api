@@ -16,10 +16,9 @@ class AnimeHandler extends JsonHandler {
      * Format to json an array of Anime entity 
      * @param $animes, array of Anime or Anime
      */
-    public function animeResponse($animes, $status = 200) : Response
+    public function animeResponse($animes, $status = 200) : string
     {
-        $jsonData = $this->serializer->serialize($animes, 'json',['groups' => ['anime_default']]);
-        return $this->headerData($jsonData, $status);
+        return $this->serializer->serialize($animes, 'json',['groups' => ['anime_default']]);
     }
 
 

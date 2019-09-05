@@ -32,13 +32,14 @@ class AnimeController extends AbstractController
     {
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
-            return $this->json(['error' => $token['error']], 400);
+            return $this->jsonHandler->responseJson(json_encode(['error' => $token['error']]), 400);
         }
 
         $level = $request->query->get('level');
         $animes = $this->animeRepository->getAllByLevel($level);
 
-        return $this->animeHandler->animeResponse($animes);
+        $data = $this->animeHandler->animeResponse($animes);
+        return $this->jsonHandler->responseJson($data);
 
     }
 }

@@ -54,7 +54,8 @@ class GameController extends AbstractController
         // Decode token
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
-            return $this->jsonHandler->responseJson(['error' => $token['error']], 400);
+            $data = $this->jsonHandler->defaultSerialize(['error' => $token['error']], 400);
+            return $this->jsonHandler->responseJson($data);
         }
         // get auth user
         $user = $this->userRepository->find($token['id']);
@@ -62,7 +63,8 @@ class GameController extends AbstractController
         // check if user is not already in a game
         $isUserInGame = $this->gameRepository->isUserInGame($user);
         if($isUserInGame === true){
-            return $this->jsonHandler->responseJson(['error' => 'You are already in a game']);
+            $data = $this->jsonHandler->defaultSerialize(['error' => 'You are already in a game']);
+            $this->jsonHandler->responseJson($data);
         }
 
         // create game and test entity validation
@@ -72,7 +74,8 @@ class GameController extends AbstractController
          // return error if find any
         if(count($errors) > 0){
              $data = $this->jsonHandler->responseValidator($errors);
-             return $this->jsonHandler->responseJson($data, 400);
+             $dataSerialize = $this->jsonHandler->defaultSerialize($data, 400);
+             return $this->jsonHandler->responseJson($data);
         }
         
         // add user creator to the game
@@ -84,7 +87,8 @@ class GameController extends AbstractController
         $this->entityManager->flush();
 
         // return new game
-        return $this->gameHandler->gamesResponse($game);
+        $data = $this->gameHandler->gamesResponse($game);
+        return $this->jsonHandler->responseJson($data);
     }
 
     /**
@@ -95,7 +99,7 @@ class GameController extends AbstractController
         // Decode token
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
-            return $this->json(['error' => $token['error']], 400);
+            return $this->jsonHandler->responseJson(json_encode(['error' => $token['error']]), 400);
         }
         // get auth user and game
         $body = json_decode($request->getContent(), true);
@@ -107,7 +111,8 @@ class GameController extends AbstractController
         $this->entityManager->persist($gameUser);
         $this->entityManager->flush();
 
-        return $this->jsonHandler->responseJson(['gameId' => $body['game_id']]);
+        $data = $this->jsonHandler->defaultSerialize(['gameId' => $body['game_id']]);
+        return $this->jsonHandler->responseJson($data);
 
     }
 
@@ -119,13 +124,14 @@ class GameController extends AbstractController
         // Decode token
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
-            return $this->json(['error' => $token['error']], 400);
+            return $this->jsonHandler->responseJson(json_encode(['error' => $token['error']]), 400);
         }
 
         $status = $request->query->get('id');
         $gameAvailable = $this->gameRepository->getGameByStatus($status);
         
-        return $this->gameHandler->gamesResponse($gameAvailable);
+        $data = $this->gameHandler->gamesResponse($gameAvailable);
+        return $this->jsonHandler->responseJson($data);
     }
 
     /**
@@ -136,13 +142,14 @@ class GameController extends AbstractController
         // Decode token
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
-            return $this->json(['error' => $token['error']], 400);
+            return $this->jsonHandler->responseJson(json_encode(['error' => $token['error']]), 400);
         }
 
         $user = $this->userRepository->find($token['id']);
         $game = $this->gameUserRepository->getRunningGame($user);
 
-        return $this->gameHandler->gamesResponse($game);
+        $data = $this->gameHandler->gamesResponse($game);
+        return $this->jsonHandler->responseJson($data);
     }   
 
     /**
@@ -153,13 +160,14 @@ class GameController extends AbstractController
         // Decode token
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
-            return $this->json(['error' => $token['error']], 400);
+            return $this->jsonHandler->responseJson(json_encode(['error' => $token['error']]), 400);
         }
 
         $gameId = $request->query->get('id');
         $game = $this->gameRepository->find($gameId);
 
-        return $this->gameHandler->gamesResponse($game);
+        $data = $this->gameHandler->gamesResponse($game);
+        return $this->jsonHandler->responseJson($data);
     }
 
     /**
@@ -170,13 +178,14 @@ class GameController extends AbstractController
         // Decode token
         $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
         if(isset($token['error'])){
-            return $this->json(['error' => $token['error']], 400);
+            return $this->jsonHandler->responseJson(json_encode(['error' => $token['error']]), 400);
         }
 
         $gameId = $request->query->get('id');
         $users = $this->gameUserRepository->getUserInGame($gameId);
 
-        return $this->jsonHandler->responseJson($users);
+        $data = $this->jsonHandler->defaultSerialize($users);
+        return $this->jsonHandler->responseJson($data);
     }
 
     /**
@@ -187,7 +196,7 @@ class GameController extends AbstractController
        // Decode token
        $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
        if(isset($token['error'])){
-           return $this->json(['error' => $token['error']], 400);
+           return $this->jsonHandler->responseJson(json_encode(['error' => $token['error']]), 400);
        }
 
        $body = json_decode($request->getContent(), true);
@@ -196,7 +205,30 @@ class GameController extends AbstractController
        $game->setStatus($body['status']);
        $this->entityManager->flush();
 
-       return $this->gameHandler->gamesResponse($game);
+       return $this->jsonHandler->responseJson(json_encode(['status' => $body['status']]));
     }
+
+    /**
+     * @Route("/game.user.leave", name="game.user.leave", methods={"POST"})
+     */
+    public function userLeaveGame(Request $request) : Response
+    {
+         // Decode token
+       $token = $this->jwt->decodeToken($request->headers->get('Authorization'));
+       if(isset($token['error'])){
+           return $this->jsonHandler->responseJson(json_encode(['error' => $token['error']]), 400);
+       }
+
+       $body = json_decode($request->getContent(), true);
+       $user = $this->userRepository->find($token['id']);
+
+       $gameUser = $this->gameUserRepository->getUserGame($user->getId(), $body['game_id']);
+
+       $this->entityManager->remove($gameUser);
+       $this->entityManager->flush();
+
+       return $this->jsonHandler->responseJson(json_encode(['game_id' => $body['game_id']]));
+    }
+
 
 }

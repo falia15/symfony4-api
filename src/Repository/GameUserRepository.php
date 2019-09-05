@@ -74,4 +74,14 @@ class GameUserRepository extends ServiceEntityRepository
         // returns an array of arrays (i.e. a raw data set)
         return $statement->fetchAll();
     }
+
+    public function getUserGame(int $userId, int $gameId) : GameUser
+    {
+        $gameUser = $this->findOneBy([
+            'user' => $userId,
+            'game' => $gameId,
+        ]);
+
+        return $gameUser;
+    }
 }

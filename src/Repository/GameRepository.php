@@ -40,7 +40,8 @@ class GameRepository extends ServiceEntityRepository
         JOIN game_user ON game_user.game_id = game.id
         JOIN user ON user.id = game.user_creator_id
         WHERE game.status = :status
-        group by game.id
+        GROUP BY game.id
+        HAVING total_player < 10
         ORDER BY timestamp DESC";
         
         $statement = $connection->prepare($sql);
